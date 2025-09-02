@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build --turbopack && cp -r .next/static .next/standalone/.next/ 2>/dev/null || true",
     "start": "next start",
+    "start:apprunner": "node apprunner-start.js",
     "lint": "eslint"
   },
   "dependencies": {
