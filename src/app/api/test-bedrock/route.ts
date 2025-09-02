@@ -87,9 +87,9 @@ export async function POST(request: NextRequest) {
             attempts: retryCount + 1
           };
           break;
-        } catch (error: any) {
+        } catch (error: unknown) {
           // Handle throttling errors with enhanced exponential backoff
-          if (error.name === 'ThrottlingException' && retryCount < maxRetries) {
+          if (error instanceof Error && error.name === 'ThrottlingException' && retryCount < maxRetries) {
             const backoffTime = Math.pow(2, retryCount) * 2000 + Math.random() * 1000;
             console.log(`Throttling detected for question ${i + 1}, retrying in ${Math.round(backoffTime)}ms (attempt ${retryCount + 1}/${maxRetries + 1})`);
             await new Promise(resolve => setTimeout(resolve, backoffTime));
@@ -102,8 +102,8 @@ export async function POST(request: NextRequest) {
           
           testResult = {
             question,
-            error: error.message,
-            errorType: error.name,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            errorType: error instanceof Error ? error.name : 'UnknownError',
             status: 'failed',
             attempts: retryCount + 1
           };
@@ -124,10 +124,10 @@ export async function POST(request: NextRequest) {
       totalQuestions: testQuestions.length,
       results
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Test API error:', error);
     return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

@@ -81,9 +81,9 @@ export async function POST(request: NextRequest) {
           response: responseBody.content[0].text,
           model: modelId,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Handle throttling errors with enhanced exponential backoff
-         if (error.name === 'ThrottlingException' && retryCount < maxRetries) {
+         if (error instanceof Error && error.name === 'ThrottlingException' && retryCount < maxRetries) {
            const backoffTime = Math.pow(2, retryCount) * 2000 + Math.random() * 1000; // Enhanced backoff with jitter
            console.log(`Throttling detected, retrying in ${Math.round(backoffTime)}ms (attempt ${retryCount + 1}/${maxRetries + 1})`);
            await new Promise(resolve => setTimeout(resolve, backoffTime));
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
          );
        }
      }
-   } catch (error: any) {
+   } catch (error: unknown) {
      console.error('Unexpected error:', error);
      return NextResponse.json(
        { error: 'Internal server error' },
