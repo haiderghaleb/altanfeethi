@@ -1,21 +1,13 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
+import { fromEnv } from '@aws-sdk/credential-providers';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Initialize Bedrock client
 let client: BedrockRuntimeClient;
 try {
-  // For Amplify deployment, credentials are provided automatically via IAM roles
-  // For local development, use AMAZON_ prefixed environment variables
-  const isAmplify = process.env.AWS_EXECUTION_ENV || process.env.AWS_LAMBDA_FUNCTION_NAME;
-  
   client = new BedrockRuntimeClient({
     region: process.env.AMAZON_REGION || process.env.AWS_REGION || 'eu-west-1',
-    // Custom credential provider that maps AMAZON_ env vars to AWS SDK
-    credentials: isAmplify ? undefined : {
-      accessKeyId: process.env.AMAZON_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '',
-      secretAccessKey: process.env.AMAZON_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '',
-      sessionToken: process.env.AMAZON_SESSION_TOKEN || process.env.AWS_SESSION_TOKEN
-    }
+    credentials: fromEnv()
   });
 } catch (error) {
   console.error('Failed to initialize Bedrock client:', error);
@@ -27,7 +19,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'AWS Bedrock client not initialized',
-          details: 'For Amplify: Ensure IAM role has Bedrock permissions. For local: Set AMAZON_ACCESS_KEY_ID, AMAZON_SECRET_ACCESS_KEY, and AMAZON_REGION.'
+          details: 'Please set your AWS credentials in environment variables or AWS credentials file.'
         },
         { status: 500 }
       );
