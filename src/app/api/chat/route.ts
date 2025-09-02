@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Validate AWS credentials
 function validateAWSCredentials() {
-  const requiredEnvVars = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'];
+  const requiredEnvVars = ['AMAZON_ACCESS_KEY_ID', 'AMAZON_SECRET_ACCESS_KEY'];
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
   
   if (missingVars.length > 0) {
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'AWS Bedrock is not properly configured. Please check your AWS credentials in .env.local file.',
-          details: 'Make sure AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_REGION are set correctly.'
+          details: 'Make sure AMAZON_ACCESS_KEY_ID, AMAZON_SECRET_ACCESS_KEY, and AMAZON_REGION are set correctly.'
         },
         { status: 500 }
       );
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { 
             error: 'AWS credentials error',
-            details: 'Please check your .env.local file and ensure AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are correctly set.'
+            details: 'Please check your .env.local file and ensure AMAZON_ACCESS_KEY_ID and AMAZON_SECRET_ACCESS_KEY are correctly set.'
           },
           { status: 401 }
         );

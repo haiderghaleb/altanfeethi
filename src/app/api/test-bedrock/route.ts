@@ -3,9 +3,9 @@ import { fromEnv } from '@aws-sdk/credential-providers';
 import { NextRequest, NextResponse } from 'next/server';
 
 function validateAWSCredentials() {
-  const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-  const region = process.env.AWS_REGION;
+  const accessKeyId = process.env.AMAZON_ACCESS_KEY_ID;
+const secretAccessKey = process.env.AMAZON_SECRET_ACCESS_KEY;
+const region = process.env.AMAZON_REGION;
 
   if (!accessKeyId || !secretAccessKey || !region) {
     throw new Error('Missing AWS credentials. Please check your .env.local file.');
