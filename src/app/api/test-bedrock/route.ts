@@ -5,9 +5,24 @@ import { NextRequest, NextResponse } from 'next/server';
 // Initialize Bedrock client
 let client: BedrockRuntimeClient;
 try {
+  // Create custom credential provider that handles AMAZON_ prefixed variables
+  const getCredentials = () => {
+    // Always prioritize AMAZON_ variables if they exist (for both local and AWS environments)
+    if (process.env.AMAZON_ACCESS_KEY_ID && process.env.AMAZON_SECRET_ACCESS_KEY) {
+      return {
+        accessKeyId: process.env.AMAZON_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AMAZON_SECRET_ACCESS_KEY,
+        sessionToken: process.env.AMAZON_SESSION_TOKEN
+      };
+    }
+    
+    // Fallback to standard AWS credential chain (IAM roles, AWS_ variables, etc.)
+    return fromEnv();
+  };
+  
   client = new BedrockRuntimeClient({
     region: process.env.AMAZON_REGION || process.env.AWS_REGION || 'eu-west-1',
-    credentials: fromEnv()
+    credentials: getCredentials()
   });
 } catch (error) {
   console.error('Failed to initialize Bedrock client:', error);
@@ -19,7 +34,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'AWS Bedrock client not initialized',
-          details: 'Please set your AWS credentials in environment variables or AWS credentials file.'
+          details: 'For AWS deployments (Amplify/App Runner): Ensure IAM role has Bedrock permissions. For local development: Set AMAZON_ACCESS_KEY_ID, AMAZON_SECRET_ACCESS_KEY, and AMAZON_REGION environment variables.'
         },
         { status: 500 }
       );
