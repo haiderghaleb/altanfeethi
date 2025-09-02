@@ -11,11 +11,13 @@ import {
   Home,
   TrendingUp,
   Settings,
-  Bell
+  Bell,
+  MessageCircle
 } from 'lucide-react';
 import StatsCard from '@/components/StatsCard';
 import Chart from '@/components/Chart';
 import RecentActivity from '@/components/RecentActivity';
+import Link from 'next/link';
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -52,9 +54,10 @@ export default function Dashboard() {
   ];
 
   const navigation = [
-    { name: 'Dashboard', icon: Home, current: true },
-    { name: 'Analytics', icon: TrendingUp, current: false },
-    { name: 'Settings', icon: Settings, current: false },
+    { name: 'Dashboard', icon: Home, current: true, href: '/' },
+    { name: 'AI Chat', icon: MessageCircle, current: false, href: '/chat' },
+    { name: 'Analytics', icon: TrendingUp, current: false, href: '#' },
+    { name: 'Settings', icon: Settings, current: false, href: '#' },
   ];
 
   return (
@@ -76,9 +79,9 @@ export default function Dashboard() {
           {navigation.map((item) => {
             const Icon = item.icon;
             return (
-              <a
+              <Link
                 key={item.name}
-                href="#"
+                href={item.href}
                 className={`flex items-center px-6 py-3 text-sm font-medium ${
                   item.current
                     ? 'bg-blue-50 border-r-2 border-blue-500 text-blue-700'
@@ -87,7 +90,7 @@ export default function Dashboard() {
               >
                 <Icon className="mr-3 h-5 w-5" />
                 {item.name}
-              </a>
+              </Link>
             );
           })}
         </nav>
