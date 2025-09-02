@@ -1,23 +1,21 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
-import { fromEnv } from '@aws-sdk/credential-providers';
 import { NextRequest, NextResponse } from 'next/server';
 
-function validateAWSCredentials() {
-  const accessKeyId = process.env.AMAZON_ACCESS_KEY_ID;
-const secretAccessKey = process.env.AMAZON_SECRET_ACCESS_KEY;
-const region = process.env.AMAZON_REGION;
-
-  if (!accessKeyId || !secretAccessKey || !region) {
-    throw new Error('Missing AWS credentials. Please check your .env.local file.');
-  }
-}
-
+// Initialize Bedrock client
 let client: BedrockRuntimeClient;
 try {
-  validateAWSCredentials();
+  // For Amplify deployment, credentials are provided automatically via IAM roles
+  // For local development, use AMAZON_ prefixed environment variables
+  const isAmplify = process.env.AWS_EXECUTION_ENV || process.env.AWS_LAMBDA_FUNCTION_NAME;
+  
   client = new BedrockRuntimeClient({
-    region: 'eu-west-1',
-    credentials: fromEnv(),
+    region: process.env.AMAZON_REGION || process.env.AWS_REGION || 'eu-west-1',
+    // Custom credential provider that maps AMAZON_ env vars to AWS SDK
+    credentials: isAmplify ? undefined : {
+      accessKeyId: process.env.AMAZON_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '',
+      secretAccessKey: process.env.AMAZON_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '',
+      sessionToken: process.env.AMAZON_SESSION_TOKEN || process.env.AWS_SESSION_TOKEN
+    }
   });
 } catch (error) {
   console.error('Failed to initialize Bedrock client:', error);
@@ -29,7 +27,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'AWS Bedrock client not initialized',
-          details: 'Please check your AWS credentials in .env.local file'
+          details: 'For Amplify: Ensure IAM role has Bedrock permissions. For local: Set AMAZON_ACCESS_KEY_ID, AMAZON_SECRET_ACCESS_KEY, and AMAZON_REGION.'
         },
         { status: 500 }
       );
